@@ -1,0 +1,51 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build, Test & Coverage Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17 (JDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Compile & Run Unit/Integration Tests
+        run: mvn clean test -B
+
+      - name: Generate & Enforce JaCoCo Coverage Gate (Min 80%)
+        run: mvn jacoco:report jacoco:check -B
+
+      - name: Package Spring Boot Application JAR
+        run: mvn package -DskipTests -B
+
+      - name: Upload JaCoCo Coverage Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco-coverage-report
+          path: target/site/jacoco/
+          retention-days: 7
+
+      - name: Upload Application JAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: target/ai-cicd-demo-0.0.1-SNAPSHOT.jar
+          retention-days: 7

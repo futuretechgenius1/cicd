@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ai-cicd-demo</a> &gt; <a href="index.source.html" class="el_package">com.example.aicicddemo.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.example.aicicddemo.controller;
+
+import com.example.aicicddemo.dto.UserResponse;
+import com.example.aicicddemo.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(&quot;/api/users&quot;)
+@Tag(name = &quot;User API&quot;, description = &quot;Protected endpoints for user details&quot;)
+@SecurityRequirement(name = &quot;bearerAuth&quot;)
+public class UserController {
+
+    private final UserService userService;
+
+<span class="fc" id="L21">    public UserController(UserService userService) {</span>
+<span class="fc" id="L22">        this.userService = userService;</span>
+<span class="fc" id="L23">    }</span>
+
+    @GetMapping(&quot;/me&quot;)
+    @Operation(summary = &quot;Get currently authenticated user details&quot;)
+    public ResponseEntity&lt;UserResponse&gt; getCurrentUser(Authentication authentication) {
+        String email;
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (authentication.getPrincipal() instanceof UserDetails userDetails) {</span>
+<span class="fc" id="L30">            email = userDetails.getUsername();</span>
+        } else {
+<span class="nc" id="L32">            email = authentication.getPrincipal().toString();</span>
+        }
+
+<span class="fc" id="L35">        UserResponse userResponse = userService.getCurrentUser(email);</span>
+<span class="fc" id="L36">        return ResponseEntity.ok(userResponse);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,11 @@
+.git
+.gitignore
+.github
+.ai
+target
+*.md
+.mvn
+mvnw
+mvnw.cmd
+Dockerfile
+docker-compose.yml

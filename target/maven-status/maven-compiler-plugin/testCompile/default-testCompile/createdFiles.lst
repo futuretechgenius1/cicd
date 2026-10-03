@@ -1,0 +1,9 @@
+com\example\aicicddemo\security\CustomUserDetailsServiceTest.class
+com\example\aicicddemo\exception\GlobalExceptionHandlerTest.class
+com\example\aicicddemo\security\JwtTokenProviderTest.class
+com\example\aicicddemo\repository\UserRepositoryTest.class
+com\example\aicicddemo\controller\UserControllerTest.class
+com\example\aicicddemo\service\UserServiceTest.class
+com\example\aicicddemo\controller\AuthControllerTest.class
+com\example\aicicddemo\security\JwtAuthenticationFilterTest.class
+com\example\aicicddemo\controller\HealthControllerTest.class
