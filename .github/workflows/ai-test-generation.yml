@@ -20,6 +20,7 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Setup Java 17
@@ -45,6 +46,9 @@ jobs:
           AI_MODEL: ${{ secrets.AI_MODEL || 'meta-llama/llama-3.3-70b-instruct' }}
           BASE_BRANCH: origin/main
         run: |
+          echo "AI_PROVIDER: $AI_PROVIDER"
+          echo "AI_MODEL: $AI_MODEL"
+          echo "AI_API_KEY configured: $(if [ -n "$AI_API_KEY" ]; then echo 'YES'; else echo 'NO'; fi)"
           python .ai/scripts/generate_tests.py
 
       - name: Execute Tests & Verify Compilation

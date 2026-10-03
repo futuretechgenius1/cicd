@@ -19,6 +19,7 @@ def get_changed_java_files(base_branch="origin/main"):
     files = set()
     
     diff_commands = [
+        ["git", "diff", "--name-only", "--diff-filter=d", "HEAD^1", "HEAD^2"],
         ["git", "diff", "--name-only", "--diff-filter=d", f"{base_branch}...HEAD"],
         ["git", "diff", "--name-only", "--diff-filter=d", f"{base_branch}", "HEAD"],
         ["git", "diff", "--name-only", "--diff-filter=d", "HEAD~1...HEAD"],
