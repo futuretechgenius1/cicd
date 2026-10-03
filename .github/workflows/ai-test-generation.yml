@@ -43,8 +43,10 @@ jobs:
         env:
           AI_PROVIDER: ${{ secrets.AI_PROVIDER || 'openrouter' }}
           AI_API_KEY: ${{ secrets.AI_API_KEY }}
-          AI_MODEL: ${{ secrets.AI_MODEL || 'qwen/qwen-2.5-coder-32b-instruct:free' }}
+          AI_MODEL: ${{ secrets.AI_MODEL || 'google/gemma-4-31b-it:free' }}
           BASE_BRANCH: origin/main
+          MIN_COVERAGE_RATIO: '0.80'
+          MAX_REGEN_ATTEMPTS: '3'
         run: |
           echo "AI_PROVIDER: $AI_PROVIDER"
           echo "AI_MODEL: $AI_MODEL"
