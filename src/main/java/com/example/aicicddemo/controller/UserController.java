@@ -35,4 +35,11 @@ public class UserController {
         UserResponse userResponse = userService.getCurrentUser(email);
         return ResponseEntity.ok(userResponse);
     }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get user details by ID")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        UserResponse userResponse = userService.getUserById(id);
+        return ResponseEntity.ok(userResponse);
+    }
 }

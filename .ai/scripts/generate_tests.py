@@ -15,22 +15,38 @@ import urllib.error
 PROMPT_FILE = os.path.join(os.path.dirname(__file__), "..", "prompts", "generate-junit-tests.md")
 
 def get_changed_java_files(base_branch="origin/main"):
-    """Find modified/added production Java files compared to base branch."""
+    """Find modified/added production Java files compared to base branch or working tree."""
+    files = set()
+    
+    # 1. Try comparing against base_branch
     try:
         cmd = ["git", "diff", "--name-only", "--diff-filter=d", f"{base_branch}...HEAD"]
-        output = subprocess.check_output(cmd, text=True)
-        files = output.strip().splitlines()
+        output = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL)
+        for line in output.strip().splitlines():
+            if line: files.add(line)
     except Exception:
-        try:
-            cmd = ["git", "diff", "--name-only", "--diff-filter=d", "HEAD~1...HEAD"]
-            output = subprocess.check_output(cmd, text=True)
-            files = output.strip().splitlines()
-        except Exception as e:
-            print(f"Warning: Unable to determine git diff ({e}). Scanning recent files.")
-            files = []
+        pass
+
+    # 2. Try comparing HEAD~1
+    try:
+        cmd = ["git", "diff", "--name-only", "--diff-filter=d", "HEAD~1...HEAD"]
+        output = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL)
+        for line in output.strip().splitlines():
+            if line: files.add(line)
+    except Exception:
+        pass
+
+    # 3. Check current working tree unstaged & staged changes
+    try:
+        cmd = ["git", "diff", "--name-only", "HEAD"]
+        output = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL)
+        for line in output.strip().splitlines():
+            if line: files.add(line)
+    except Exception:
+        pass
 
     prod_java_files = [f for f in files if f.startswith("src/main/java/") and f.endswith(".java")]
-    return prod_java_files
+    return sorted(prod_java_files)
 
 def read_file(filepath):
     if os.path.exists(filepath):

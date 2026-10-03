@@ -57,4 +57,23 @@ class UserControllerTest {
         mockMvc.perform(get("/api/users/me"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    @DisplayName("GET /api/users/{id} should return 200 OK with user details")
+    @WithMockUser(username = "john@example.com")
+    void getUserById_Success() throws Exception {
+        UserResponse response = UserResponse.builder()
+                .id(1L)
+                .name("John Doe")
+                .email("john@example.com")
+                .build();
+
+        when(userService.getUserById(1L)).thenReturn(response);
+
+        mockMvc.perform(get("/api/users/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("John Doe"))
+                .andExpect(jsonPath("$.email").value("john@example.com"));
+    }
 }
