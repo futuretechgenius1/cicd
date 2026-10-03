@@ -34,6 +34,10 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Fetch Target Base Branch (origin/main)
+        run: |
+          git fetch origin main:origin/main || true
+
       - name: Run AI JUnit Test Generator
         env:
           AI_PROVIDER: ${{ secrets.AI_PROVIDER || 'openrouter' }}
