@@ -128,16 +128,24 @@ class {test_class_name} {{
     return test_file_path, test_code
 
 def extract_java_code(response_text):
-    """Extract code block inside ```java ... ```."""
+    """Extract code block inside ```java ... ``` and sanitize hallucinated imports."""
     if not response_text:
         return ""
+    code = ""
     match = re.search(r"```java\s*(.*?)\s*```", response_text, re.DOTALL)
     if match:
-        return match.group(1).strip()
-    match = re.search(r"```\s*(.*?)\s*```", response_text, re.DOTALL)
-    if match:
-        return match.group(1).strip()
-    return response_text.strip()
+        code = match.group(1).strip()
+    else:
+        match = re.search(r"```\s*(.*?)\s*```", response_text, re.DOTALL)
+        if match:
+            code = match.group(1).strip()
+        else:
+            code = response_text.strip()
+
+    # Sanitize hallucinated non-existent package imports
+    code = re.sub(r'import\s+com\.example\.aicicddemo\.service\.impl\.[^;]+;\s*\n?', '', code)
+    code = re.sub(r'import\s+com\.example\.aicicddemo\.model\.[^;]+;\s*\n?', '', code)
+    return code
 
 def main():
     print("=== Starting AI JUnit Test Generator ===")
