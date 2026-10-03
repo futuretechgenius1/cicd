@@ -160,8 +160,8 @@ To enable full AI test generation and CD deployment, configure the following sec
 | Secret Name | Required for | Description |
 |---|---|---|
 | `AI_API_KEY` | AI Test Gen | API key for OpenAI / GitHub Models / Azure OpenAI API. |
-| `AI_PROVIDER` | AI Test Gen | Provider type: `openai` or `github-models` (Default: `openai`). |
-| `AI_MODEL` | AI Test Gen | Target AI model name (Default: `gpt-4o-mini`). |
+| `AI_PROVIDER` | AI Test Gen | Provider type: `openrouter`, `openai`, or `github-models` (Default: `openrouter`). |
+| `AI_MODEL` | AI Test Gen | Target AI model name (Default: `qwen/qwen-2.5-coder-32b-instruct:free`). |
 | `DEPLOY_HOST` | CD Pipeline | Target deployment VM IP address / hostname. |
 | `DEPLOY_USER` | CD Pipeline | SSH username for deployment target server. |
 | `DEPLOY_SSH_KEY` | CD Pipeline | Private SSH key for server access. |

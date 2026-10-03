@@ -50,7 +50,7 @@ def write_file(filepath, content):
         f.write(content)
 
 def call_ai_api(prompt_system, user_content, provider, api_key, model):
-    """Call OpenAI compatible Chat Completions API using standard library."""
+    """Call OpenAI compatible Chat Completions API using standard library with automatic model fallback."""
     if provider == "github-models":
         endpoint = "https://models.inference.ai.azure.com/chat/completions"
     elif provider == "openrouter":
@@ -58,35 +58,59 @@ def call_ai_api(prompt_system, user_content, provider, api_key, model):
     else:
         endpoint = "https://api.openai.com/v1/chat/completions"
 
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": prompt_system},
-            {"role": "user", "content": user_content}
-        ],
-        "temperature": 0.2,
-        "max_tokens": 1500
-    }
+    # Primary model followed by top free OpenRouter models for code generation
+    candidate_models = [model]
+    if provider == "openrouter":
+        free_fallbacks = [
+            "qwen/qwen-2.5-coder-32b-instruct:free",
+            "meta-llama/llama-3.3-70b-instruct:free",
+            "deepseek/deepseek-r1-distill-llama-70b:free",
+            "google/gemini-2.0-flash-exp:free",
+            "mistralai/mistral-small-24b-instruct-2501:free"
+        ]
+        for m in free_fallbacks:
+            if m not in candidate_models:
+                candidate_models.append(m)
 
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}",
-        "HTTP-Referer": "https://github.com/futuretechgenius1/cicd",
-        "X-Title": "Spring Boot AI CI/CD Demo"
-    }
+    last_exception = None
+    for target_model in candidate_models:
+        payload = {
+            "model": target_model,
+            "messages": [
+                {"role": "system", "content": prompt_system},
+                {"role": "user", "content": user_content}
+            ],
+            "temperature": 0.2,
+            "max_tokens": 1500
+        }
 
-    req = urllib.request.Request(endpoint, data=json.dumps(payload).encode("utf-8"), headers=headers)
-    
-    try:
-        with urllib.request.urlopen(req) as response:
-            res_data = json.loads(response.read().decode("utf-8"))
-            return res_data["choices"][0]["message"]["content"]
-    except urllib.error.HTTPError as e:
-        print(f"AI API HTTP Error {e.code}: {e.read().decode('utf-8')}")
-        raise e
-    except Exception as e:
-        print(f"AI API Error: {e}")
-        raise e
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+            "HTTP-Referer": "https://github.com/futuretechgenius1/cicd",
+            "X-Title": "Spring Boot AI CI/CD Demo"
+        }
+
+        req = urllib.request.Request(endpoint, data=json.dumps(payload).encode("utf-8"), headers=headers)
+        
+        try:
+            print(f"Calling AI model: {target_model} via {provider}...")
+            with urllib.request.urlopen(req) as response:
+                res_data = json.loads(response.read().decode("utf-8"))
+                content = res_data["choices"][0]["message"]["content"]
+                if content:
+                    print(f"Successfully received response from model: {target_model}")
+                    return content
+        except urllib.error.HTTPError as e:
+            err_body = e.read().decode('utf-8')
+            print(f"AI API HTTP Error {e.code} for model {target_model}: {err_body}")
+            last_exception = e
+        except Exception as e:
+            print(f"AI API Error for model {target_model}: {e}")
+            last_exception = e
+
+    if last_exception:
+        raise last_exception
 
 def generate_fallback_test(prod_file_path, code):
     """Generate a template test if AI_API_KEY is not set (mock mode)."""
@@ -142,7 +166,7 @@ def main():
     
     provider = os.getenv("AI_PROVIDER", "openai").lower()
     api_key = os.getenv("AI_API_KEY", "").strip()
-    model = os.getenv("AI_MODEL", "gpt-4o-mini").strip()
+    model = os.getenv("AI_MODEL", "qwen/qwen-2.5-coder-32b-instruct:free").strip()
     base_branch = os.getenv("BASE_BRANCH", "origin/main")
 
     changed_files = get_changed_java_files(base_branch)
