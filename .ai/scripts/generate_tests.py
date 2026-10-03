@@ -63,6 +63,8 @@ def call_ai_api(prompt_system, user_content, provider, api_key, model):
     """Call OpenAI compatible Chat Completions API using standard library."""
     if provider == "github-models":
         endpoint = "https://models.inference.ai.azure.com/chat/completions"
+    elif provider == "openrouter":
+        endpoint = "https://openrouter.ai/api/v1/chat/completions"
     else:
         endpoint = "https://api.openai.com/v1/chat/completions"
 
@@ -72,12 +74,15 @@ def call_ai_api(prompt_system, user_content, provider, api_key, model):
             {"role": "system", "content": prompt_system},
             {"role": "user", "content": user_content}
         ],
-        "temperature": 0.2
+        "temperature": 0.2,
+        "max_tokens": 1500
     }
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
+        "Authorization": f"Bearer {api_key}",
+        "HTTP-Referer": "https://github.com/futuretechgenius1/cicd",
+        "X-Title": "Spring Boot AI CI/CD Demo"
     }
 
     req = urllib.request.Request(endpoint, data=json.dumps(payload).encode("utf-8"), headers=headers)
@@ -124,6 +129,8 @@ class {test_class_name} {{
 
 def extract_java_code(response_text):
     """Extract code block inside ```java ... ```."""
+    if not response_text:
+        return ""
     match = re.search(r"```java\s*(.*?)\s*```", response_text, re.DOTALL)
     if match:
         return match.group(1).strip()

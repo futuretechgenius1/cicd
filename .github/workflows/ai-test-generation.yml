@@ -36,9 +36,9 @@ jobs:
 
       - name: Run AI JUnit Test Generator
         env:
-          AI_PROVIDER: ${{ secrets.AI_PROVIDER || 'openai' }}
+          AI_PROVIDER: ${{ secrets.AI_PROVIDER || 'openrouter' }}
           AI_API_KEY: ${{ secrets.AI_API_KEY }}
-          AI_MODEL: ${{ secrets.AI_MODEL || 'gpt-4o-mini' }}
+          AI_MODEL: ${{ secrets.AI_MODEL || 'meta-llama/llama-3.3-70b-instruct' }}
           BASE_BRANCH: origin/main
         run: |
           python .ai/scripts/generate_tests.py
