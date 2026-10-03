@@ -1,6 +1,7 @@
 package com.example.aicicddemo.controller;
 
 import com.example.aicicddemo.dto.UserResponse;
+import com.example.aicicddemo.exception.ResourceNotFoundException;
 import com.example.aicicddemo.security.CustomUserDetailsService;
 import com.example.aicicddemo.security.JwtTokenProvider;
 import com.example.aicicddemo.service.UserService;
@@ -75,5 +76,26 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("John Doe"))
                 .andExpect(jsonPath("$.email").value("john@example.com"));
+    }
+
+    @Test
+    @DisplayName("GET /api/users/{id} should return 404 Not Found when user does not exist")
+    @WithMockUser(username = "john@example.com")
+    void getUserById_NotFound() throws Exception {
+        when(userService.getUserById(999L))
+                .thenThrow(new ResourceNotFoundException("User not found with id: 999"));
+
+        mockMvc.perform(get("/api/users/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("RESOURCE_NOT_FOUND"));
+    }
+
+    @Test
+    @DisplayName("GET /api/users/{id} should return 400 Bad Request when ID is invalid format")
+    @WithMockUser(username = "john@example.com")
+    void getUserById_InvalidId() throws Exception {
+        mockMvc.perform(get("/api/users/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
     }
 }
