@@ -35,4 +35,18 @@ public class UserController {
         UserResponse userResponse = userService.getCurrentUser(email);
         return ResponseEntity.ok(userResponse);
     }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get user details by ID")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        UserResponse userResponse = userService.getUserById(id);
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @PutMapping("/{id}/name")
+    @Operation(summary = "Update user name")
+    public ResponseEntity<UserResponse> updateUserName(@PathVariable Long id, @RequestParam String name) {
+        UserResponse response = userService.updateUserName(id, name);
+        return ResponseEntity.ok(response);
+    }
 }

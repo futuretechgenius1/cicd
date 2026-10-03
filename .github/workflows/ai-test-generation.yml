@@ -20,6 +20,7 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Setup Java 17
@@ -34,13 +35,22 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Fetch Target Base Branch (origin/main)
+        run: |
+          git fetch origin main:origin/main || true
+
       - name: Run AI JUnit Test Generator
         env:
-          AI_PROVIDER: ${{ secrets.AI_PROVIDER || 'openai' }}
+          AI_PROVIDER: ${{ secrets.AI_PROVIDER || 'openrouter' }}
           AI_API_KEY: ${{ secrets.AI_API_KEY }}
-          AI_MODEL: ${{ secrets.AI_MODEL || 'gpt-4o-mini' }}
+          AI_MODEL: ${{ secrets.AI_MODEL || 'google/gemma-4-31b-it:free' }}
           BASE_BRANCH: origin/main
+          MIN_COVERAGE_RATIO: '0.80'
+          MAX_REGEN_ATTEMPTS: '3'
         run: |
+          echo "AI_PROVIDER: $AI_PROVIDER"
+          echo "AI_MODEL: $AI_MODEL"
+          echo "AI_API_KEY configured: $(if [ -n "$AI_API_KEY" ]; then echo 'YES'; else echo 'NO'; fi)"
           python .ai/scripts/generate_tests.py
 
       - name: Execute Tests & Verify Compilation
